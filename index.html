@@ -29,7 +29,7 @@
       --accent-hover: #1557b0;   /* Deep blue hover */
       --accent-light: #d2e3fc;   /* Soft blue tint background */
       
-      --chat-bg-user: #e9eef6;   /* Light gray-blue for user message */
+      --chat-bg-user: #d2e3fc;   /* Light gray-blue for user message */
       --chat-bg-ai: #ffffff;     /* White card for AI response */
       
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -958,9 +958,7 @@
 
         <!-- Default greeting screen -->
         <div class="empty-chat-welcome" id="welcomeBlock">
-          <div class="welcome-icon">⚡</div>
-          <h2 class="welcome-title">Briefly AI</h2>
-          <p class="welcome-desc">Drop your text documents or paste any text below. Briefly will sanitize copy-paste website noise and craft a clean, structured summary instantly.</p>
+          <p class="welcome-desc" style="margin-top: 100px; font-size: 15px; color: var(--text-muted); max-width: 460px;">Drop your text documents or paste any text below. Briefly will sanitize copy-paste website noise and craft a clean, structured summary instantly.</p>
         </div>
 
       </div>
@@ -1256,7 +1254,7 @@
       appState.activeChat = { id: null, title: "Text Digest", inputText: "", summaryText: "", modelUsed: "", isBookmarked: false, timestamp: null };
       setViewMode('chat');
       const container = document.getElementById('chatContainer');
-      container.innerHTML = `<div class="empty-chat-welcome" id="welcomeBlock"><div class="welcome-icon">⚡</div><h2 class="welcome-title">Briefly AI</h2><p class="welcome-desc">Drop your text documents or paste any text below. Briefly will sanitize copy-paste website noise and craft a clean, structured summary instantly.</p></div>`;
+      container.innerHTML = `<div class="empty-chat-welcome" id="welcomeBlock"><p class="welcome-desc" style="margin-top: 100px; font-size: 15px; color: var(--text-muted); max-width: 460px;">Drop your text documents or paste any text below. Briefly will sanitize copy-paste website noise and craft a clean, structured summary instantly.</p></div>`;
       document.getElementById('textInput').value = '';
       autoExpandTextarea();
       document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
