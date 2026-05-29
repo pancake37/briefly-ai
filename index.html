@@ -1493,7 +1493,10 @@
               { role: "system", content: systemPrompt },
               { role: "user", content: `Please write a concise, bulleted summary of this text in ${targetLang}:\n\n${textVal}` }
             ],
-            temperature: 0.3
+            temperature: 0.3,
+            provider: {
+              sort: "throughput"
+            }
           })
         });
 
