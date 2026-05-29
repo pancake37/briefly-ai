@@ -14,6 +14,11 @@
   <!-- Marked Markdown Parser -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+  <!-- PDF.js for client-side PDF text extraction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <!-- JSZip for client-side PPTX/unzipping text extraction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
   <style>
     :root {
       /* Gemini Premium Light Theme Palette */
@@ -1032,7 +1037,7 @@
           <div class="chat-input-bottom-row">
             <div class="chat-input-actions-left">
               <!-- Plus button for File Trigger -->
-              <button class="input-action-btn-circle" onclick="triggerFileUpload()" title="Upload text file">
+              <button class="input-action-btn-circle" onclick="triggerFileUpload()" title="Upload file">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1040,7 +1045,7 @@
               </button>
               
               <!-- Hidden input for file trigger -->
-              <input type="file" id="fileUploadInput" style="display: none;" accept=".txt,.md,.js,.json,.html,.css,.py" onchange="handleFileSelected(event)">
+              <input type="file" id="fileUploadInput" style="display: none;" accept=".txt,.md,.js,.json,.html,.css,.py,.pdf,.pptx" onchange="handleFileSelected(event)">
 
               <!-- Language Selector -->
               <div class="language-select-wrapper">
@@ -1127,6 +1132,11 @@
       renderBookmarksList();
       setupPasteWatermarkCleaner();
       setupDragAndDrop();
+      
+      // Setup PDF.js Worker
+      if (window.pdfjsLib) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+      }
     });
 
     function changeLanguage() {
@@ -1297,18 +1307,109 @@
       });
     }
 
-    function importFileContent(file) {
-      if (file.size > 10 * 1024 * 1024) {
-        showToast('File size exceeds 10MB limit', 'error');
+    async function importFileContent(file) {
+      if (file.size > 15 * 1024 * 1024) {
+        showToast('File size exceeds 15MB limit', 'error');
         return;
       }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        document.getElementById('textInput').value = event.target.result;
+
+      const fileName = file.name.toLowerCase();
+      
+      try {
+        showToast(`Reading ${file.name}... 📂`, 'info');
+        
+        let extractedText = "";
+        
+        if (fileName.endsWith('.pdf')) {
+          extractedText = await parsePdf(file);
+        } else if (fileName.endsWith('.pptx')) {
+          extractedText = await parsePptx(file);
+        } else {
+          // Fallback to text file import
+          extractedText = await readAsTextFile(file);
+        }
+        
+        document.getElementById('textInput').value = extractedText;
         autoExpandTextarea();
-        showToast(`Imported ${file.name} successfully!`, 'success');
-      };
-      reader.readAsText(file);
+        showToast(`Imported ${file.name} successfully! ✨`, 'success');
+      } catch (err) {
+        console.error(err);
+        showToast(`Failed to parse file: ${err.message}`, 'error');
+      }
+    }
+
+    function readAsTextFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(new Error("Could not read file as text"));
+        reader.readAsText(file);
+      });
+    }
+
+    async function parsePdf(file) {
+      const pdfjsLib = window.pdfjsLib;
+      if (!pdfjsLib) {
+        throw new Error("PDF.js library is not loaded.");
+      }
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let fullText = "";
+      
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(" ");
+        if (pageText.trim()) {
+          fullText += `--- Page ${i} ---\n${pageText.trim()}\n\n`;
+        }
+      }
+      
+      if (!fullText.trim()) {
+        throw new Error("No text found in PDF document.");
+      }
+      return fullText.trim();
+    }
+
+    async function parsePptx(file) {
+      const jsZip = window.JSZip;
+      if (!jsZip) {
+        throw new Error("JSZip library is not loaded.");
+      }
+      const zip = await jsZip.loadAsync(file);
+      let fullText = "";
+      
+      // Find all slide XML files
+      const slideFiles = Object.keys(zip.files).filter(name => name.startsWith("ppt/slides/slide") && name.endsWith(".xml"));
+      
+      // Sort slide files numerically (slide1.xml, slide2.xml...)
+      slideFiles.sort((a, b) => {
+        const numA = parseInt(a.replace(/[^\d]/g, ""), 10);
+        const numB = parseInt(b.replace(/[^\d]/g, ""), 10);
+        return numA - numB;
+      });
+
+      for (let i = 0; i < slideFiles.length; i++) {
+        const slideName = slideFiles[i];
+        const xmlContent = await zip.files[slideName].async("text");
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
+        const textNodes = xmlDoc.getElementsByTagName("a:t");
+        
+        let slideText = "";
+        for (let j = 0; j < textNodes.length; j++) {
+          slideText += textNodes[j].textContent + " ";
+        }
+        
+        if (slideText.trim()) {
+          fullText += `--- Slide ${i + 1} ---\n${slideText.trim()}\n\n`;
+        }
+      }
+      
+      if (!fullText.trim()) {
+        throw new Error("No text found in PowerPoint slides.");
+      }
+      return fullText.trim();
     }
 
     // --- View modes ---
