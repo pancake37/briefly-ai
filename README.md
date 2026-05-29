@@ -4,7 +4,6 @@
 
 Briefly AI is an intelligent text summarization and clipboard sanitation tool that lives in your browser, parses complex documents, and cleans website noise instantly -- all client-side. Use it in your browser, host it on GitHub Pages, or run it locally -- all through a gorgeous responsive interface.
 
-**Learn more in the [official documentation](https://github.com/pancake37/briefly-ai#readme)**.
 
 <img src="./demo.gif" />
 
