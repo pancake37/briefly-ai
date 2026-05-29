@@ -739,6 +739,45 @@
       height: 20px;
     }
 
+    /* Language Selector Styles */
+    .language-select-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background-color: #f1f3f4;
+      border-radius: 18px;
+      padding: 0 10px 0 12px;
+      height: 32px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .language-select-wrapper:hover {
+      background-color: #e8eaed;
+    }
+
+    .language-select-wrapper:focus-within {
+      background-color: #ffffff;
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+    }
+
+    .language-select {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      font-family: inherit;
+      padding: 0;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      padding-right: 4px;
+    }
+
     /* Blue circular arrow-up send button */
     .send-arrow-btn {
       width: 36px;
@@ -1002,6 +1041,29 @@
               
               <!-- Hidden input for file trigger -->
               <input type="file" id="fileUploadInput" style="display: none;" accept=".txt,.md,.js,.json,.html,.css,.py" onchange="handleFileSelected(event)">
+
+              <!-- Language Selector -->
+              <div class="language-select-wrapper">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right: 6px; color: var(--text-muted);">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <select id="languageSelect" class="language-select" title="Output Language" onchange="changeLanguage()">
+                  <option value="English">English</option>
+                  <option value="Russian">Russian</option>
+                  <option value="Mandarin Chinese">Chinese (Mandarin)</option>
+                  <option value="Hindi">Hindi</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="Modern Standard Arabic">Arabic</option>
+                  <option value="French">French</option>
+                  <option value="Portuguese">Portuguese</option>
+                  <option value="Standard German">German</option>
+                  <option value="Japanese">Japanese</option>
+                  <option value="Italian">Italian</option>
+                  <option value="Korean">Korean</option>
+                </select>
+              </div>
             </div>
 
             <!-- Send button: blue arrow up circle -->
@@ -1041,6 +1103,7 @@
     let appState = {
       apiKey: localStorage.getItem('briefly_api_key') || '',
       bookmarks: JSON.parse(localStorage.getItem('briefly_bookmarks') || '[]'),
+      targetLanguage: localStorage.getItem('briefly_target_language') || 'English',
 
       activeChat: {
         id: null,
@@ -1059,11 +1122,19 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('apiKeyInput').value = appState.apiKey;
+      document.getElementById('languageSelect').value = appState.targetLanguage;
       updateApiStatusButton();
       renderBookmarksList();
       setupPasteWatermarkCleaner();
       setupDragAndDrop();
     });
+
+    function changeLanguage() {
+      const select = document.getElementById('languageSelect');
+      appState.targetLanguage = select.value;
+      localStorage.setItem('briefly_target_language', select.value);
+      showToast(`Output language set to ${select.value}`, "info");
+    }
 
     // --- Gemini style Expandable Textarea Logic ---
     function toggleExpandInput() {
@@ -1307,7 +1378,8 @@
       setGeneratingState(true);
       appState.abortController = new AbortController();
 
-      const systemPrompt = "You are a professional AI editor. Your sole objective is to write a highly concise, bulleted summary of the provided text in English. Structure the output clearly using lists and bold text. Deliver the summary directly without any preambles, introductory sentences, or concluding statements.";
+      const targetLang = appState.targetLanguage || 'English';
+      const systemPrompt = `You are a professional AI editor. Your sole objective is to write a highly concise, bulleted summary of the provided text in ${targetLang}. Structure the output clearly using lists and bold text. Deliver the summary directly without any preambles, introductory sentences, or concluding statements. Regardless of the input language, you must write the final summary entirely in ${targetLang}.`;
 
       try {
         const response = await fetch(apiUrl, {
@@ -1318,7 +1390,7 @@
             model: "openrouter/free",
             messages: [
               { role: "system", content: systemPrompt },
-              { role: "user", content: `Please write a concise, bulleted English summary of this text:\n\n${textVal}` }
+              { role: "user", content: `Please write a concise, bulleted summary of this text in ${targetLang}:\n\n${textVal}` }
             ],
             temperature: 0.3
           })
