@@ -18,22 +18,24 @@
 
   <style>
     :root {
-      --bg-sidebar: #F7F7F5;
-      --bg-main: #FFFFFF;
-      --text-main: #37352F;
-      --text-muted: #7A7A78;
-      --border-color: #EDECE9;
+      /* Claude Code / Terminal obsidian theme colors */
+      --bg-sidebar: #0d1117;     /* Deep slate sidebar */
+      --bg-main: #161b22;        /* Sleek terminal main body */
+      --text-main: #c9d1d9;      /* Monospace light gray text */
+      --text-muted: #8b949e;     /* Cool gray for secondary info */
+      --border-color: #30363d;   /* Subtle dark console borders */
 
-      /* Фирменный цвет из запроса пользователя */
-      --accent-color: #99bd7a;
-      --accent-hover: #86a967;
-      --accent-light: rgba(153, 189, 122, 0.12);
+      /* Emerald Terminal active accents */
+      --accent-color: #10B981;   /* Emerald green active accents */
+      --accent-hover: #059669;   /* Hover green */
+      --accent-light: rgba(16, 185, 129, 0.08);
 
-      --chat-bg-user: #99bd7a;
-      --chat-bg-ai: #F1F1F0;
+      --chat-bg-user: #21262d;   /* User message bubble (solid slate) */
+      --chat-bg-ai: #0d1117;     /* AI message bubble (console black) */
 
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      --shadow-sm: 0 1px 2px rgba(15, 15, 15, 0.04), 0 2px 4px rgba(15, 15, 15, 0.04);
+      --font-mono: 'Fira Code', 'Courier New', Courier, monospace;
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     * {
@@ -53,15 +55,8 @@
 
     /* Анимация пульсации для загрузчика */
     @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 0.4;
-      }
-
-      50% {
-        opacity: 1;
-      }
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
     }
 
     @keyframes bubbleFadeIn {
@@ -69,7 +64,6 @@
         opacity: 0;
         transform: translateY(10px) scale(0.98);
       }
-
       to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -100,7 +94,8 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 13.5px;
+      font-size: 13px;
+      font-family: var(--font-mono);
       font-weight: 600;
       color: var(--text-main);
     }
@@ -116,20 +111,23 @@
       background-color: transparent;
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 7px 12px;
+      padding: 8px 12px;
       border-radius: 6px;
-      font-size: 12.5px;
+      font-size: 12px;
+      font-family: var(--font-mono);
       font-weight: 500;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: background 0.15s ease;
+      transition: all 0.15s ease;
     }
 
     .new-chat-btn:hover {
-      background-color: rgba(55, 53, 47, 0.04);
+      background-color: var(--accent-light);
+      border-color: var(--accent-color);
+      color: var(--accent-color);
     }
 
     .sidebar-scroll {
@@ -140,6 +138,7 @@
 
     .sidebar-section-title {
       font-size: 11px;
+      font-family: var(--font-mono);
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -150,11 +149,11 @@
     .sidebar-list {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
     }
 
     .sidebar-item {
-      padding: 6px 10px;
+      padding: 8px 10px;
       border-radius: 6px;
       font-size: 13px;
       color: var(--text-main);
@@ -163,15 +162,18 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      transition: background 0.15s ease;
+      transition: background 0.15s ease, color 0.15s ease;
     }
 
     .sidebar-item:hover {
-      background-color: rgba(55, 53, 47, 0.04);
+      background-color: var(--chat-bg-user);
+      color: var(--text-main);
     }
 
     .sidebar-item.active {
-      background-color: rgba(55, 53, 47, 0.08);
+      background-color: var(--accent-light);
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
       font-weight: 500;
     }
 
@@ -189,6 +191,10 @@
       width: 14px;
       height: 14px;
       color: var(--text-muted);
+    }
+
+    .sidebar-item.active .sidebar-item-label svg {
+      color: var(--accent-color);
     }
 
     .sidebar-item-actions {
@@ -213,8 +219,8 @@
     }
 
     .sidebar-action-btn:hover {
-      background-color: rgba(55, 53, 47, 0.08);
-      color: var(--text-main);
+      background-color: var(--chat-bg-user);
+      color: #ef4444;
     }
 
     /* --- ГЛАВНЫЙ КОНТЕЙНЕР (Workspace) --- */
@@ -227,7 +233,7 @@
       position: relative;
     }
 
-    /* ВЕРХНЯЯ ШАПКА ЧАТА (В стиле мобильного экрана из примера) */
+    /* ВЕРХНЯЯ ШАПКА ЧАТА */
     .chat-header {
       height: 64px;
       min-height: 64px;
@@ -236,7 +242,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background-color: #FFFFFF;
+      background-color: var(--bg-sidebar);
       z-index: 5;
     }
 
@@ -252,7 +258,7 @@
       border-radius: 50%;
       background-color: var(--accent-light);
       border: 1.5px solid var(--accent-color);
-      color: var(--accent-hover);
+      color: var(--accent-color);
       font-weight: 700;
       font-size: 15px;
       display: flex;
@@ -266,7 +272,7 @@
       width: 10px;
       height: 10px;
       background-color: var(--accent-color);
-      border: 2px solid #FFFFFF;
+      border: 2px solid var(--bg-sidebar);
       border-radius: 50%;
       position: absolute;
       bottom: 0;
@@ -279,13 +285,15 @@
     }
 
     .model-meta-name {
-      font-size: 14px;
+      font-size: 13.5px;
+      font-family: var(--font-mono);
       font-weight: 600;
       color: var(--text-main);
     }
 
     .model-meta-status {
       font-size: 11px;
+      font-family: var(--font-mono);
       color: var(--accent-color);
       font-weight: 500;
     }
@@ -295,7 +303,8 @@
       background: transparent;
       border: 1px solid var(--border-color);
       color: var(--text-muted);
-      font-size: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
       font-weight: 500;
       padding: 6px 12px;
       border-radius: 6px;
@@ -308,13 +317,14 @@
 
     .api-key-popover-trigger:hover {
       border-color: var(--accent-color);
-      color: var(--text-main);
+      color: var(--accent-color);
+      background-color: var(--accent-light);
     }
 
     .api-key-popover-trigger.active {
       background-color: var(--accent-light);
       border-color: var(--accent-color);
-      color: var(--accent-hover);
+      color: var(--accent-color);
     }
 
     /* Всплывающая плашка ввода ключа */
@@ -323,11 +333,11 @@
       top: 68px;
       right: 20px;
       width: 280px;
-      background-color: #FFFFFF;
+      background-color: var(--bg-sidebar);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 16px;
-      box-shadow: 0 4px 16px rgba(15, 15, 15, 0.08);
+      box-shadow: var(--shadow-sm);
       display: none;
       flex-direction: column;
       gap: 12px;
@@ -339,7 +349,8 @@
     }
 
     .api-popover-title {
-      font-size: 12px;
+      font-size: 11px;
+      font-family: var(--font-mono);
       font-weight: 600;
       color: var(--text-main);
       text-transform: uppercase;
@@ -348,12 +359,14 @@
 
     .api-popover-input {
       width: 100%;
+      background-color: var(--bg-main);
       border: 1px solid var(--border-color);
       border-radius: 4px;
       padding: 6px 10px;
-      font-size: 13px;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 12px;
       outline: none;
-      font-family: inherit;
     }
 
     .api-popover-input:focus {
@@ -362,14 +375,16 @@
 
     .api-popover-btn {
       background-color: var(--accent-color);
-      color: white;
+      color: #FFFFFF;
       border: none;
       padding: 6px 12px;
       border-radius: 4px;
-      font-size: 12px;
-      font-weight: 500;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 600;
       cursor: pointer;
       align-self: flex-end;
+      transition: background-color 0.15s ease;
     }
 
     .api-popover-btn:hover {
@@ -384,7 +399,7 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
-      background-color: #FCFCFB;
+      background-color: var(--bg-main);
     }
 
     .chat-scroll-container {
@@ -410,17 +425,19 @@
     }
 
     .welcome-icon {
-      font-size: 48px;
+      font-size: 40px;
+      color: var(--accent-color);
     }
 
     .welcome-title {
-      font-size: 18px;
+      font-size: 20px;
+      font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-main);
     }
 
     .welcome-desc {
-      font-size: 13.5px;
+      font-size: 13px;
       max-width: 380px;
       line-height: 1.5;
     }
@@ -441,57 +458,87 @@
     }
 
     .message-bubble {
-      max-width: 80%;
-      border-radius: 18px;
+      max-width: 85%;
+      border-radius: 12px;
       padding: 14px 18px;
       font-size: 14px;
       line-height: 1.6;
-      box-shadow: 0 1px 2px rgba(15, 15, 15, 0.02);
+      box-shadow: var(--shadow-sm);
       position: relative;
     }
 
     /* Сообщение пользователя */
     .message-bubble.user-bubble {
       background-color: var(--chat-bg-user);
-      color: #FFFFFF;
-      border-bottom-right-radius: 4px;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-bottom-right-radius: 2px;
       white-space: pre-wrap;
     }
 
     /* Сообщение ИИ */
     .message-bubble.ai-bubble {
-      background-color: var(--bg-main);
+      background-color: var(--chat-bg-ai);
       color: var(--text-main);
       border: 1px solid var(--border-color);
-      border-bottom-left-radius: 4px;
+      border-bottom-left-radius: 2px;
       width: 100%;
     }
 
     /* Заголовки и разметка Markdown внутри ИИ-пузыря */
-    .message-bubble.ai-bubble p {
-      margin-bottom: 10px;
+    .bubble-markdown-content {
+      font-family: var(--font-sans);
     }
 
-    .message-bubble.ai-bubble p:last-child {
+    .bubble-markdown-content p {
+      margin-bottom: 12px;
+    }
+
+    .bubble-markdown-content p:last-child {
       margin-bottom: 0;
     }
 
-    .message-bubble.ai-bubble ul,
-    .message-bubble.ai-bubble ol {
-      margin-bottom: 10px;
+    .bubble-markdown-content ul,
+    .bubble-markdown-content ol {
+      margin-bottom: 12px;
       padding-left: 20px;
     }
 
-    .message-bubble.ai-bubble li {
+    .bubble-markdown-content li {
       margin-bottom: 4px;
     }
 
-    .message-bubble.ai-bubble strong {
-      color: #000000;
+    .bubble-markdown-content strong {
+      color: #FFFFFF;
       font-weight: 600;
     }
 
-    /* Шапка автора (ИИ-модели) внутри пузыря */
+    .bubble-markdown-content code {
+      font-family: var(--font-mono);
+      background-color: var(--chat-bg-user);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--accent-hover);
+    }
+
+    .bubble-markdown-content pre {
+      font-family: var(--font-mono);
+      background-color: var(--bg-sidebar);
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+    }
+
+    .bubble-markdown-content pre code {
+      background-color: transparent;
+      padding: 0;
+      color: var(--text-main);
+    }
+
+    /* Шапка автора внутри пузыря */
     .bubble-author-header {
       display: flex;
       align-items: center;
@@ -507,7 +554,7 @@
       border-radius: 50%;
       background-color: var(--accent-light);
       border: 1px solid var(--accent-color);
-      color: var(--accent-hover);
+      color: var(--accent-color);
       font-weight: 700;
       font-size: 11px;
       display: flex;
@@ -524,13 +571,15 @@
     }
 
     .bubble-author-name {
-      font-size: 12.5px;
+      font-size: 12px;
+      font-family: var(--font-mono);
       font-weight: 600;
       color: var(--text-main);
     }
 
     .bubble-author-meta {
-      font-size: 10.5px;
+      font-size: 10px;
+      font-family: var(--font-mono);
       color: var(--text-muted);
     }
 
@@ -548,20 +597,21 @@
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 11.5px;
+      font-size: 11px;
+      font-family: var(--font-mono);
       font-weight: 500;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 4px;
-      padding: 2px 4px;
+      padding: 4px 6px;
       border-radius: 4px;
       transition: all 0.15s ease;
     }
 
     .bubble-action-btn:hover {
-      background-color: rgba(55, 53, 47, 0.05);
-      color: var(--text-main);
+      background-color: var(--accent-light);
+      color: var(--accent-color);
     }
 
     .bubble-action-btn.bookmarked {
@@ -573,23 +623,23 @@
       height: 12px;
     }
 
-    /* Загрузочный скелетон (Pulsing Skeleton Bubble) */
+    /* Загрузочный скелетон */
     .skeleton-bubble {
       display: flex;
       flex-direction: column;
       gap: 10px;
       width: 280px;
-      background-color: var(--bg-main);
+      background-color: var(--chat-bg-ai);
       border: 1px solid var(--border-color);
-      border-radius: 18px;
-      border-bottom-left-radius: 4px;
+      border-radius: 12px;
+      border-bottom-left-radius: 2px;
       padding: 16px;
       animation: pulse 1.5s infinite ease-in-out;
     }
 
     .skeleton-line {
       height: 12px;
-      background-color: rgba(55, 53, 47, 0.08);
+      background-color: var(--chat-bg-user);
       border-radius: 4px;
     }
 
@@ -599,22 +649,14 @@
       margin-bottom: 4px;
     }
 
-    .skeleton-line.s2 {
-      width: 90%;
-    }
+    .skeleton-line.s2 { width: 90%; }
+    .skeleton-line.s3 { width: 85%; }
+    .skeleton-line.s4 { width: 65%; }
 
-    .skeleton-line.s3 {
-      width: 85%;
-    }
-
-    .skeleton-line.s4 {
-      width: 65%;
-    }
-
-    /* --- НИЖНЯЯ ПАНЕЛЬ ВВОДА (В стиле диалога) --- */
+    /* --- НИЖНЯЯ ПАНЕЛЬ ВВОДА --- */
     .chat-input-area {
       padding: 16px 20px 24px 20px;
-      background-color: #FFFFFF;
+      background-color: var(--bg-main);
       border-top: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
@@ -629,23 +671,24 @@
       position: relative;
     }
 
-    /* Капсула поля ввода (из скриншота) */
+    /* Капсула поля ввода */
     .chat-input-capsule {
       width: 100%;
-      background-color: #FAFAFA;
+      background-color: var(--bg-sidebar);
       border: 1px solid var(--border-color);
       border-radius: 24px;
       padding: 8px 12px 8px 18px;
       display: flex;
       align-items: flex-end;
       gap: 10px;
-      transition: border-color 0.2s ease, background-color 0.2s ease;
+      transition: all 0.20s ease;
       position: relative;
     }
 
     .chat-input-capsule:focus-within {
       border-color: var(--accent-color);
-      background-color: #FFFFFF;
+      background-color: var(--chat-bg-ai);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.15);
     }
 
     .chat-input-textarea {
@@ -676,15 +719,15 @@
       justify-content: center;
       cursor: pointer;
       color: var(--text-muted);
-      transition: background 0.15s ease, color 0.15s ease;
+      transition: all 0.15s ease;
     }
 
     .input-icon-btn:hover {
-      background-color: rgba(55, 53, 47, 0.05);
+      background-color: var(--chat-bg-user);
       color: var(--text-main);
     }
 
-    /* Круглая кнопка Отправить (акцентная) */
+    /* Круглая кнопка Отправить */
     .send-circle-btn {
       width: 34px;
       height: 34px;
@@ -712,11 +755,10 @@
       width: 14px;
       height: 14px;
       margin-left: 2px;
-      /* центровка самолетика */
     }
 
     .send-circle-btn:disabled {
-      background-color: rgba(55, 53, 47, 0.08);
+      background-color: var(--chat-bg-user);
       color: var(--text-muted);
       cursor: not-allowed;
     }
@@ -729,6 +771,7 @@
       justify-content: space-between;
       align-items: center;
       font-size: 11px;
+      font-family: var(--font-mono);
       color: var(--text-muted);
       margin-top: 6px;
       padding: 0 16px;
@@ -741,7 +784,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: rgba(255, 255, 255, 0.95);
+      background-color: rgba(13, 17, 23, 0.95);
       border: 2px dashed var(--accent-color);
       border-radius: 24px;
       display: flex;
@@ -767,6 +810,7 @@
 
     .drag-overlay span {
       font-size: 12px;
+      font-family: var(--font-mono);
       color: var(--text-muted);
       font-weight: 500;
     }
@@ -788,12 +832,13 @@
       padding: 10px 16px;
       border-radius: 6px;
       font-size: 13px;
+      font-family: var(--font-mono);
       font-weight: 500;
       color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 4px 12px rgba(15, 15, 15, 0.08);
+      box-shadow: var(--shadow-sm);
       animation: bubbleFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
   </style>
@@ -836,7 +881,7 @@
     <header class="chat-header">
       <div class="active-model-info">
         <div class="model-avatar-circle"
-          style="background-color: var(--accent-light); border: 1.5px solid var(--accent-color); color: var(--accent-hover);">
+          style="background-color: var(--accent-light); border: 1.5px solid var(--accent-color); color: var(--accent-color);">
           🤖<div class="online-indicator"></div>
         </div>
         <div class="model-meta">
@@ -867,9 +912,9 @@
 
     <!-- Окно просмотра отдельной закладки (Twitter/X style) -->
     <div class="bookmark-view-container" id="bookmarkViewContainer"
-      style="display: none; flex: 1; flex-direction: column; background-color: #FCFCFB;">
+      style="display: none; flex: 1; flex-direction: column; background-color: var(--bg-main);">
       <div class="bookmark-view-header"
-        style="height: 64px; min-height: 64px; border-bottom: 1px solid var(--border-color); padding: 0 20px; display: flex; align-items: center; justify-content: space-between; background-color: #FFFFFF;">
+        style="height: 64px; min-height: 64px; border-bottom: 1px solid var(--border-color); padding: 0 20px; display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-sidebar);">
         <span
           style="font-size: 14px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2.5"
@@ -904,7 +949,7 @@
 
         <!-- Приветствие по умолчанию (если чат пуст) -->
         <div class="empty-chat-welcome" id="welcomeBlock">
-          <div class="welcome-icon">✍️</div>
+          <div class="welcome-icon">💻</div>
           <h2 class="welcome-title">Briefly AI</h2>
           <p class="welcome-desc">Вставьте любой текст ниже. Я очищу его от водяных знаков и рекламы сайта, а затем
             выдам краткое, тезисное изложение.</p>
@@ -1122,7 +1167,7 @@
       appState.activeChat = { id: null, title: "Краткое изложение текста", inputText: "", summaryText: "", modelUsed: "", isBookmarked: false, timestamp: null };
       setViewMode('chat');
       const container = document.getElementById('chatContainer');
-      container.innerHTML = `<div class="empty-chat-welcome" id="welcomeBlock"><div class="welcome-icon">✍️</div><h2 class="welcome-title">Briefly AI</h2><p class="welcome-desc">Вставьте любой текст ниже. Я очищу его от водяных знаков и рекламы сайта, а затем выдам краткое, тезисное изложение.</p></div>`;
+      container.innerHTML = `<div class="empty-chat-welcome" id="welcomeBlock"><div class="welcome-icon">💻</div><h2 class="welcome-title">Briefly AI</h2><p class="welcome-desc">Вставьте любой текст ниже. Я очищу его от водяных знаков и рекламы сайта, а затем выдам краткое, тезисное изложение.</p></div>`;
       document.getElementById('textInput').value = '';
       autoExpandTextarea();
       document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
