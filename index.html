@@ -1268,10 +1268,6 @@
       showToast("New dialog created", "info");
     }
 
-    // --- Fallback Cloudflare Worker URL for Free Trial mode ---
-    // Once deployed on Cloudflare, paste your Worker URL here (e.g., "https://briefly-proxy.yourname.workers.dev")
-    const CLOUDFLARE_PROXY_URL = ""; 
-
     // --- Send request to API ---
     async function sendInput() {
       if (appState.isGenerating) return;
@@ -1283,26 +1279,19 @@
         return;
       }
       
-      let apiUrl = "https://openrouter.ai/api/v1/chat/completions";
-      let headers = {
+      if (!appState.apiKey.trim().startsWith('sk-or-')) {
+        toggleApiPopover();
+        showToast("Please enter an OpenRouter API key in settings!", "warning");
+        return;
+      }
+      
+      const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
+      const headers = {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${appState.apiKey}`,
         "HTTP-Referer": window.location.origin || "http://localhost",
         "X-Title": "Briefly AI"
       };
-
-      // Check if user has their own API Key
-      if (appState.apiKey.trim().startsWith('sk-or-')) {
-        headers["Authorization"] = `Bearer ${appState.apiKey}`;
-      } else {
-        // Fallback to developer's free trial proxy Worker
-        if (!CLOUDFLARE_PROXY_URL || CLOUDFLARE_PROXY_URL.trim() === "") {
-          toggleApiPopover();
-          showToast("Please enter an OpenRouter API key in settings!", "warning");
-          return;
-        }
-        apiUrl = CLOUDFLARE_PROXY_URL;
-        showToast("Using free trial proxy limit... ✨", "info");
-      }
 
       appState.activeChat.inputText = textVal;
       setViewMode('chat');
