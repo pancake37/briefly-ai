@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Briefly AI — Smart Text Summarizer</title>
 
-  <!-- Google Fonts Inter & Fira Code -->
+  <!-- Google Fonts Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -69,7 +69,7 @@
       }
     }
 
-    /* --- SIDEBAR (Gemini Style) --- */
+    /* --- SIDEBAR --- */
     .sidebar {
       width: 280px;
       min-width: 280px;
@@ -217,7 +217,44 @@
 
     .sidebar-action-btn:hover {
       background-color: rgba(0, 0, 0, 0.05);
-      color: #d93025; /* Google Red */
+      color: #d93025;
+    }
+
+    /* Sidebar settings bottom container */
+    .sidebar-settings {
+      padding: 12px 4px 4px 4px;
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+    }
+
+    .api-key-popover-trigger {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 10px 16px;
+      border-radius: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.15s ease;
+    }
+
+    .api-key-popover-trigger:hover {
+      background-color: var(--bg-body);
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    .api-key-popover-trigger.active {
+      background-color: var(--accent-light);
+      border-color: var(--accent-color);
+      color: var(--accent-color);
     }
 
     /* --- WORKSPACE --- */
@@ -230,110 +267,21 @@
       position: relative;
     }
 
-    /* CHAT HEADER */
-    .chat-header {
-      height: 64px;
-      min-height: 64px;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: transparent;
-      z-index: 5;
-    }
-
-    .active-model-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .model-avatar-circle {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background-color: #ffffff;
-      border: 1px solid var(--border-color);
-      color: var(--accent-color);
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      user-select: none;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
-    .online-indicator {
-      width: 8px;
-      height: 8px;
-      background-color: #34a853; /* Google Green */
-      border: 1.5px solid #ffffff;
-      border-radius: 50%;
-      position: absolute;
-      bottom: 0;
-      right: 0;
-    }
-
-    .model-meta {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .model-meta-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    .model-meta-status {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    .api-key-popover-trigger {
-      background: #ffffff;
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      font-size: 12px;
-      font-weight: 500;
-      padding: 8px 16px;
-      border-radius: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      transition: all 0.15s ease;
-    }
-
-    .api-key-popover-trigger:hover {
-      background-color: #f8f9fa;
-      border-color: var(--accent-color);
-      color: var(--accent-color);
-    }
-
-    .api-key-popover-trigger.active {
-      background-color: var(--accent-light);
-      border-color: var(--accent-color);
-      color: var(--accent-color);
-    }
-
-    /* API Popover */
+    /* Centered Modal Popover */
     .api-popover {
-      position: absolute;
-      top: 68px;
-      right: 24px;
-      width: 290px;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
       background-color: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      padding: 24px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12);
       display: none;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
       z-index: 100;
     }
 
@@ -382,11 +330,27 @@
       background-color: var(--accent-hover);
     }
 
+    /* Backdrop overlay for open modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.2);
+      display: none;
+      z-index: 99;
+    }
+
+    .modal-backdrop.show {
+      display: block;
+    }
+
     /* --- CHAT FEED --- */
     .chat-feed {
       flex: 1;
       overflow-y: auto;
-      padding: 20px 24px;
+      padding: 32px 24px 20px 24px;
       display: flex;
       flex-direction: column;
       background-color: transparent;
@@ -409,7 +373,7 @@
       justify-content: center;
       text-align: center;
       gap: 16px;
-      margin-top: 60px;
+      margin-top: 80px;
       color: var(--text-muted);
       animation: bubbleFadeIn 0.3s ease;
     }
@@ -457,7 +421,7 @@
       position: relative;
     }
 
-    /* User Message - Clean capsule */
+    /* User Message */
     .message-bubble.user-bubble {
       background-color: var(--chat-bg-user);
       color: var(--text-main);
@@ -465,7 +429,7 @@
       white-space: pre-wrap;
     }
 
-    /* AI Message - Clean floating card */
+    /* AI Message */
     .message-bubble.ai-bubble {
       background-color: var(--chat-bg-ai);
       color: var(--text-main);
@@ -667,7 +631,6 @@
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     }
 
-    /* Compact and expanded state layouts */
     .chat-input-capsule.expanded {
       border-radius: 24px;
     }
@@ -734,7 +697,7 @@
       transition: transform 0.2s ease;
     }
 
-    /* Bottom Actions Row matching Google Gemini details */
+    /* Bottom Actions Row (Simplified: NO Model Dropdown) */
     .chat-input-bottom-row {
       display: flex;
       align-items: center;
@@ -776,25 +739,6 @@
       height: 20px;
     }
 
-    /* Beautiful Google-style dropdown for models selection */
-    .model-selector-dropdown {
-      background-color: #f1f3f4;
-      border: none;
-      outline: none;
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-main);
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.15s ease;
-    }
-
-    .model-selector-dropdown:hover {
-      background-color: #e8eaed;
-    }
-
     /* Blue circular arrow-up send button */
     .send-arrow-btn {
       width: 36px;
@@ -832,7 +776,7 @@
       box-shadow: none;
     }
 
-    /* Info bar below input container */
+    /* Info Row below input capsule */
     .input-info-row {
       width: 100%;
       max-width: 760px;
@@ -931,6 +875,9 @@
 
 <body>
 
+  <!-- BACKDROP OVERLAY FOR MODAL -->
+  <div class="modal-backdrop" id="modalBackdrop" onclick="toggleApiPopover()"></div>
+
   <!-- SIDEBAR PANEL -->
   <aside class="sidebar">
     <div class="sidebar-header">
@@ -956,32 +903,22 @@
         <!-- Bookmark items injected dynamically -->
       </div>
     </div>
-  </aside>
 
-  <!-- CHAT MAIN WORKSPACE -->
-  <main class="workspace">
-
-    <!-- Header -->
-    <header class="chat-header">
-      <div class="active-model-info">
-        <div class="model-avatar-circle">
-          ⚡<div class="online-indicator"></div>
-        </div>
-        <div class="model-meta">
-          <span class="model-meta-name">Digest Assistant</span>
-          <span class="model-meta-status" id="headerModelStatus">Active (openrouter/free)</span>
-        </div>
-      </div>
-
+    <!-- Sidebar bottom settings containing API Key button -->
+    <div class="sidebar-settings">
       <button class="api-key-popover-trigger" id="apiTrigger" onclick="toggleApiPopover()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
         </svg>
         <span id="apiBtnLabel">API Key</span>
       </button>
-    </header>
+    </div>
+  </aside>
 
-    <!-- API Key settings popover -->
+  <!-- CHAT MAIN WORKSPACE (Completely headerless!) -->
+  <main class="workspace">
+
+    <!-- API Key settings popover modal -->
     <div class="api-popover" id="apiPopover">
       <span class="api-popover-title">OpenRouter API Key</span>
       <input type="password" class="api-popover-input" id="apiKeyInput" placeholder="sk-or-v1-..." onkeydown="if(event.key==='Enter') saveApiKey()">
@@ -998,7 +935,7 @@
           </svg>
           Saved Bookmarked Digest
         </span>
-        <button class="api-key-popover-trigger" onclick="exitBookmarkView()">
+        <button class="api-key-popover-trigger" onclick="exitBookmarkView()" style="width: auto;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1060,14 +997,6 @@
               
               <!-- Hidden input for file trigger -->
               <input type="file" id="fileUploadInput" style="display: none;" accept=".txt,.md,.js,.json,.html,.css,.py" onchange="handleFileSelected(event)">
-
-              <!-- Google-style model selector -->
-              <select class="model-selector-dropdown" id="modelSelector" onchange="handleModelChanged()">
-                <option value="openrouter/free">Gemini 2.5 Flash (Free)</option>
-                <option value="google/gemini-2.5-pro">Gemini 2.5 Pro</option>
-                <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B</option>
-              </select>
             </div>
 
             <!-- Send button: blue arrow up circle -->
@@ -1107,7 +1036,6 @@
     let appState = {
       apiKey: localStorage.getItem('briefly_api_key') || '',
       bookmarks: JSON.parse(localStorage.getItem('briefly_bookmarks') || '[]'),
-      selectedModel: 'openrouter/free',
 
       activeChat: {
         id: null,
@@ -1141,12 +1069,10 @@
       
       if (appState.isInputExpanded) {
         capsule.classList.add('expanded');
-        // Change icon to collapse arrows
         expandIcon.innerHTML = `<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7" />`;
         showToast("Input area expanded", "info");
       } else {
         capsule.classList.remove('expanded');
-        // Restore expand icon
         expandIcon.innerHTML = `<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />`;
       }
       
@@ -1208,7 +1134,6 @@
 
     function cleanClipboardWatermarks(text) {
       let cleaned = text;
-      // Regexes to wipe website trailing ads, copyrights, read more links, etc.
       const trailingBlockRegex = /--\s*[\s\S]*?(https?:\/\/\S+|©\s*\S+)/gi;
       cleaned = cleaned.replace(trailingBlockRegex, '');
       cleaned = cleaned.replace(/©\s*[A-Za-z0-9\sА-Яа-яёЁ.-]+$/gi, '');
@@ -1221,7 +1146,14 @@
     // --- API Key Management ---
     function toggleApiPopover() {
       const popover = document.getElementById('apiPopover');
-      popover.classList.toggle('show');
+      const backdrop = document.getElementById('modalBackdrop');
+      
+      const isShow = popover.classList.toggle('show');
+      if (isShow) {
+        backdrop.classList.add('show');
+      } else {
+        backdrop.classList.remove('show');
+      }
     }
 
     function saveApiKey() {
@@ -1261,30 +1193,7 @@
       }
     }
 
-    function importFileContent(file) {
-      if (file.size > 10 * 1024 * 1024) {
-        showToast('File size exceeds 10MB limit', 'error');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        document.getElementById('textInput').value = event.target.result;
-        autoExpandTextarea();
-        showToast(`Imported ${file.name} successfully!`, 'success');
-      };
-      reader.readAsText(file);
-    }
-
-    // --- Model Change handler ---
-    function handleModelChanged() {
-      const selector = document.getElementById('modelSelector');
-      appState.selectedModel = selector.value;
-      const displayModel = formatModelName(appState.selectedModel);
-      document.getElementById('headerModelStatus').innerText = `Active (${displayModel})`;
-      showToast(`Switched model to ${displayModel}`, "info");
-    }
-
-    // --- Drag and Drop ---
+    // Drag and Drop
     function setupDragAndDrop() {
       const dropZone = document.getElementById('dropZone');
       const overlay = document.getElementById('dragOverlay');
@@ -1312,20 +1221,31 @@
       });
     }
 
-    // --- View modes (Chat vs. Bookmarked view) ---
+    function importFileContent(file) {
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('File size exceeds 10MB limit', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        document.getElementById('textInput').value = event.target.result;
+        autoExpandTextarea();
+        showToast(`Imported ${file.name} successfully!`, 'success');
+      };
+      reader.readAsText(file);
+    }
+
+    // --- View modes ---
     function setViewMode(mode) {
-      const chatHeader = document.querySelector('.chat-header');
       const chatFeed = document.getElementById('chatFeed');
       const inputArea = document.querySelector('.chat-input-area');
       const bookmarkView = document.getElementById('bookmarkViewContainer');
 
       if (mode === 'bookmark') {
-        chatHeader.style.display = 'none';
         chatFeed.style.display = 'none';
         inputArea.style.display = 'none';
         bookmarkView.style.display = 'flex';
       } else {
-        chatHeader.style.display = 'flex';
         chatFeed.style.display = 'flex';
         inputArea.style.display = 'flex';
         bookmarkView.style.display = 'none';
@@ -1387,7 +1307,7 @@
           },
           signal: appState.abortController.signal,
           body: JSON.stringify({
-            model: appState.selectedModel,
+            model: "openrouter/free",
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: `Please write a concise, bulleted English summary of this text:\n\n${textVal}` }
@@ -1406,7 +1326,7 @@
         removeSkeletonLoader(skeletonId);
 
         const summaryText = data.choices[0]?.message?.content || "Could not retrieve summary.";
-        const cleanedModel = formatModelName(data.model || appState.selectedModel);
+        const cleanedModel = formatModelName(data.model || "openrouter/free");
         const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
         appendAiBubble(summaryText, cleanedModel, timestamp);
