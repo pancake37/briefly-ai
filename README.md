@@ -1,5 +1,7 @@
 # Briefly AI
 
+🌐 **[Live Demo — Try Briefly AI Instantly!](https://pancake37.github.io/briefly-ai/)**
+
 ![](https://img.shields.io/badge/Architecture-SPA-blue?style=flat-square) [![GitHub license](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](https://opensource.org/licenses/MIT)
 
 Briefly AI is an intelligent text summarization and clipboard sanitation tool that lives in your browser, parses complex documents, and cleans website noise instantly -- all client-side. Use it in your browser, host it on GitHub Pages, or run it locally -- all through a gorgeous responsive interface.
