@@ -13,8 +13,6 @@ Briefly AI is an intelligent text summarization and clipboard sanitation tool th
 > [!NOTE]
 > Running via a local web server or directly double-clicking the HTML file is fully supported.
 
-For more installation options, host steps, and troubleshooting, see the [setup documentation](#get-started).
-
 1. Install and launch Briefly AI:
 
     **Direct Launch (Recommended):**
