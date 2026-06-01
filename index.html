@@ -18,6 +18,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
   <!-- JSZip for client-side PPTX/unzipping text extraction -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Mammoth.js for client-side Word (.docx) text extraction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <!-- SheetJS for client-side Excel (.xlsx) text extraction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <style>
     :root {
@@ -1045,7 +1049,7 @@
               </button>
               
               <!-- Hidden input for file trigger -->
-              <input type="file" id="fileUploadInput" style="display: none;" accept=".txt,.md,.js,.json,.html,.css,.py,.pdf,.pptx" onchange="handleFileSelected(event)">
+              <input type="file" id="fileUploadInput" style="display: none;" accept=".txt,.md,.js,.json,.html,.css,.py,.pdf,.pptx,.docx,.xlsx" onchange="handleFileSelected(event)">
 
               <!-- Language Selector -->
               <div class="language-select-wrapper">
@@ -1324,6 +1328,10 @@
           extractedText = await parsePdf(file);
         } else if (fileName.endsWith('.pptx')) {
           extractedText = await parsePptx(file);
+        } else if (fileName.endsWith('.docx')) {
+          extractedText = await parseDocx(file);
+        } else if (fileName.endsWith('.xlsx')) {
+          extractedText = await parseXlsx(file);
         } else {
           // Fallback to text file import
           extractedText = await readAsTextFile(file);
@@ -1336,6 +1344,50 @@
         console.error(err);
         showToast(`Failed to parse file: ${err.message}`, 'error');
       }
+    }
+
+    async function parseDocx(file) {
+      const mammoth = window.mammoth;
+      if (!mammoth) {
+        throw new Error("Mammoth.js library is not loaded.");
+      }
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.convertToMarkdown({ arrayBuffer: arrayBuffer });
+      if (!result.value || !result.value.trim()) {
+        throw new Error("No text found in Word document.");
+      }
+      return result.value.trim();
+    }
+
+    async function parseXlsx(file) {
+      const XLSX = window.XLSX;
+      if (!XLSX) {
+        throw new Error("SheetJS library is not loaded.");
+      }
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      let markdown = "";
+      
+      workbook.SheetNames.forEach(sheetName => {
+        const worksheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        if (rows.length > 0) {
+          markdown += `### Sheet: ${sheetName}\n\n`;
+          rows.forEach((row, rowIndex) => {
+            const cleanCells = row.map(cell => cell !== null && cell !== undefined ? String(cell).replace(/\|/g, '\\|') : "");
+            markdown += "| " + cleanCells.join(" | ") + " |\n";
+            if (rowIndex === 0) {
+              markdown += "| " + row.map(() => "---").join(" | ") + " |\n";
+            }
+          });
+          markdown += "\n";
+        }
+      });
+      
+      if (!markdown.trim()) {
+        throw new Error("No data found in Excel spreadsheet.");
+      }
+      return markdown.trim();
     }
 
     function readAsTextFile(file) {

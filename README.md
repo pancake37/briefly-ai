@@ -39,7 +39,13 @@ This repository includes a single self-contained Single Page Application (SPA) t
 - **Intelligent Summarization**: Integrates directly with the OpenRouter API to synthesize deep markdown summaries using Gemini, Claude, and other state-of-the-art LLMs.
 - **Smart Clipboard Sanitation**: Automatically intercepts paste events to remove annoying site trackers, copyright text, and website watermarks instantly.
 - **Bookmarks Library**: Stores summaries locally in a beautiful side-panel feed utilizing standard browser `localStorage`.
-- **Drag & Drop Uploads**: Allows dropping raw text files up to 10MB directly into the editor for instant parsing.
+- **Client-Side Document Parsing**: Support for dragging and dropping or uploading documents directly up to 15MB:
+  - 📄 **PDFs (`.pdf`)** — extracted page-by-page.
+  - 📊 **PowerPoints (`.pptx`)** — extracted slide-by-slide.
+  - 📝 **Word Documents (`.docx`)** — parsed into clean, semantic Markdown.
+  - 📈 **Excel Spreadsheets (`.xlsx`)** — converted sheet-by-sheet into readable Markdown tables.
+  - 💻 **Plain Text / Code** (`.txt`, `.md`, `.js`, `.json`, `.html`, `.css`, `.py`) — loaded instantly.
+
 
 ## Reporting Bugs
 
