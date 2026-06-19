@@ -1251,7 +1251,11 @@
     </button>
 
     <div class="sidebar-scroll">
-      <div class="sidebar-section-title">Saved Digests</div>
+      <div class="sidebar-section-title">Recent</div>
+      <div class="sidebar-list" id="chatsList">
+        <!-- Chat history items injected dynamically -->
+      </div>
+      <div class="sidebar-section-title" style="margin-top: 8px;">Saved Digests</div>
       <div class="sidebar-list" id="bookmarksList">
         <!-- Bookmark items injected dynamically -->
       </div>
@@ -1443,16 +1447,13 @@
     let appState = {
       apiKey: localStorage.getItem('briefly_api_key') || '',
       bookmarks: JSON.parse(localStorage.getItem('briefly_bookmarks') || '[]'),
+      chats: JSON.parse(localStorage.getItem('briefly_chats') || '[]'),
       targetLanguage: localStorage.getItem('briefly_target_language') || 'English',
 
       activeChat: {
         id: null,
-        title: "Text Digest",
-        inputText: "",
-        summaryText: "",
-        modelUsed: "",
-        isBookmarked: false,
-        timestamp: null
+        title: "New Dialog",
+        messages: [],  // [{role: 'user'|'ai', text, model?, timestamp?}]
       },
 
       isGenerating: false,
@@ -1465,6 +1466,7 @@
       document.getElementById('languageSelect').value = appState.targetLanguage;
       updateApiStatusButton();
       renderBookmarksList();
+      renderChatsList();
       setupPasteWatermarkCleaner();
       setupDragAndDrop();
       initTheme();
@@ -1814,14 +1816,15 @@
     }
 
     function createNewChat() {
-      appState.activeChat = { id: null, title: "Text Digest", inputText: "", summaryText: "", modelUsed: "", isBookmarked: false, timestamp: null };
+      saveCurrentChat();
+      appState.activeChat = { id: 'chat_' + Date.now(), title: "New Dialog", messages: [] };
       setViewMode('chat');
       const container = document.getElementById('chatContainer');
       container.innerHTML = `<div class="empty-chat-welcome" id="welcomeBlock"><p class="welcome-desc" style="margin-top: 100px; font-size: 15px; color: var(--text-muted); max-width: 460px;">Drop your text documents or paste any text below. Briefly will sanitize copy-paste website noise and craft a clean, structured summary instantly.</p></div>`;
       document.getElementById('textInput').value = '';
       autoExpandTextarea();
       document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-      showToast("New dialog created", "info");
+      renderChatsList();
     }
 
     // --- Send request to API ---
@@ -1849,7 +1852,10 @@
         "X-Title": "Briefly AI"
       };
 
-      appState.activeChat.inputText = textVal;
+      // Ensure chat has an ID for history tracking
+      if (!appState.activeChat.id) {
+        appState.activeChat.id = 'chat_' + Date.now();
+      }
       setViewMode('chat');
 
       const welcome = document.getElementById('welcomeBlock');
@@ -1937,8 +1943,18 @@
         const cleanedModel = formatModelName(modelName);
         finalizeStreamBubble(streamBubble, fullText, cleanedModel, timestamp);
 
-        appState.activeChat.summaryText = fullText;
-        appState.activeChat.modelUsed = cleanedModel;
+        // Save messages to chat history
+        appState.activeChat.messages.push(
+          { role: 'user', text: textVal, timestamp: timestamp },
+          { role: 'ai', text: fullText, model: cleanedModel, timestamp: timestamp }
+        );
+        // Auto-title from first user message
+        if (appState.activeChat.title === 'New Dialog') {
+          const firstMsg = textVal.replace(/\n/g, ' ').trim();
+          appState.activeChat.title = firstMsg.length > 30 ? firstMsg.substring(0, 30) + '...' : firstMsg;
+        }
+        saveCurrentChat();
+        renderChatsList();
         showToast("Digest generated successfully! ✨", "success");
       } catch (err) {
         if (err.name !== 'AbortError') {
@@ -2085,6 +2101,100 @@
     function scrollToBottom() {
       const feed = document.getElementById('chatFeed');
       feed.scrollTop = feed.scrollHeight;
+    }
+
+    // --- Chat History Management ---
+    function saveCurrentChat() {
+      const chat = appState.activeChat;
+      if (!chat.id || chat.messages.length === 0) return;
+
+      const idx = appState.chats.findIndex(c => c.id === chat.id);
+      const chatData = { id: chat.id, title: chat.title, messages: chat.messages, updatedAt: Date.now() };
+
+      if (idx >= 0) {
+        appState.chats[idx] = chatData;
+      } else {
+        appState.chats.unshift(chatData);
+      }
+
+      // Keep max 50 chats
+      if (appState.chats.length > 50) {
+        appState.chats = appState.chats.slice(0, 50);
+      }
+
+      localStorage.setItem('briefly_chats', JSON.stringify(appState.chats));
+    }
+
+    function renderChatsList() {
+      const container = document.getElementById('chatsList');
+      container.innerHTML = '';
+
+      if (appState.chats.length === 0) {
+        container.innerHTML = `<div style="font-size: 11px; color: var(--text-muted); padding: 8px; font-style: italic; text-align: center;">No recent chats</div>`;
+        return;
+      }
+
+      appState.chats.forEach(chat => {
+        const div = document.createElement('div');
+        div.className = 'sidebar-item';
+        div.id = 'sidebar_chat_' + chat.id;
+        if (appState.activeChat.id === chat.id) div.classList.add('active');
+        div.onclick = () => loadChat(chat.id);
+
+        div.innerHTML = `
+          <div class="sidebar-item-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>${escapeHtml(chat.title)}</span>
+          </div>
+          <div class="sidebar-item-actions" onclick="event.stopPropagation()">
+            <button class="sidebar-action-btn" onclick="deleteChat('${chat.id}')" title="Delete" aria-label="Delete chat">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    function loadChat(id) {
+      saveCurrentChat();
+      const chat = appState.chats.find(c => c.id === id);
+      if (!chat) return;
+
+      appState.activeChat = { id: chat.id, title: chat.title, messages: [...chat.messages] };
+      setViewMode('chat');
+
+      const container = document.getElementById('chatContainer');
+      container.innerHTML = '';
+
+      // Rebuild chat bubbles from messages
+      chat.messages.forEach(msg => {
+        if (msg.role === 'user') {
+          appendUserBubble(msg.text);
+        } else if (msg.role === 'ai') {
+          appendAiBubble(msg.text, msg.model || 'Assistant', msg.timestamp || '');
+        }
+      });
+
+      document.getElementById('textInput').value = '';
+      autoExpandTextarea();
+
+      document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+      const sidebarItem = document.getElementById('sidebar_chat_' + id);
+      if (sidebarItem) sidebarItem.classList.add('active');
+    }
+
+    function deleteChat(id) {
+      if (!confirm("Delete this chat?")) return;
+      appState.chats = appState.chats.filter(c => c.id !== id);
+      localStorage.setItem('briefly_chats', JSON.stringify(appState.chats));
+      renderChatsList();
+
+      if (appState.activeChat.id === id) {
+        createNewChat();
+      }
+      showToast("Chat deleted", "info");
     }
 
     // --- Bookmarks Management ---
